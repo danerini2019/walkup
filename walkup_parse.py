@@ -41,3 +41,8 @@ for i in range(len(dict['songs'])):
         df.loc[len(df.index)] = append_row.loc[0]
         
 print(df)
+
+# Next Steps (no order)
+# - split song column into artist and song columns
+# - extrapolate logic to all teams - probably just call GET in loop or list of teams
+# - add functional strucutre - get data function that will be called in main function
