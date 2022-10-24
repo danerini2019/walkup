@@ -12,10 +12,19 @@ def main():
     # "Phillies", "Rangers", "Rays", "Reds", "Rockies",
     # "Tigers", "Twins", "Yankees"]
 
-    team_lst = ['yankees']
+    team_lst = ['angels','athletics']
 
     # team_lst_no_data = ['pirates', 'redsox', 'brewers', 
     #                     'marlins', 'whitesox', 'royals']
+
+    # song name get output types
+    # 1. Angels - default? Accessed by longer class name along
+    # 2. As - longer class followed by u-app-show/hide
+    #   players with multiple songs - songs in sibling u-app classes
+    # 3. Phillies - longer class parent of u-app
+    #   multiple songs separated by returns
+    # 4. song not available - example in yanks, accessed by long 
+    # in this case but could also appear in other forms
 
     player_lst = []
     song_lst = []
@@ -29,21 +38,22 @@ def main():
         # lst = [type(item) for item in list(soup.children)]
         stuff = list(stuff.children)[1]
         player_names = stuff.find_all(class_='u-text-h4 u-text-flow')
-        # player_songs = stuff.find_all(class_='u-app-show')
-        player_songs_class = stuff.find_all(class_='p-wysiwyg styles-sc-1ewxgrh-0 styles-sc-9861x0-0 bjPBFY gLBcvo')
-        player_songs = player_songs_class.find_all(class_='u-app-show')
-        print(player_songs)
-        if player_songs_class.find_all(class_='u-app-show') == []:
+        player_songs = stuff.find_all(class_='u-app-show')
+        # player_songs = player_songs.find(class_='u-app-show')
+        try:
+            player_songs[0].get_text()
+        except:
+            print('no u-app-class')
             player_songs = stuff.find_all(class_='p-wysiwyg styles-sc-1ewxgrh-0 styles-sc-9861x0-0 bjPBFY gLBcvo')
-            print(player_songs)
-        # Different methods of storing song data for each team.
-        # Need to find a way to parse out all edge cases for each nested class
+        print(player_songs[0].get_text().strip())
+        # if stuff.find_all(class_='u-app-show') == []:
+        #     player_songs = stuff.find_all(class_='p-wysiwyg styles-sc-1ewxgrh-0 styles-sc-9861x0-0 bjPBFY gLBcvo')
+        #     print(player_songs)
         
-
         # lists of songs and players
         player_lst.append([player_names[i].get_text() for i in range(len(player_names))])
         song_lst.append([player_songs[i].get_text() for i in range(len(player_songs))])
-        print([player_songs[i].get_text() for i in range(len(player_songs))])
+        # print([player_songs[i].get_text() for i in range(len(player_songs))])
 
     # Bringing values into dataframe and adding rows for players with multiple songs
     player_lst_clean = []
@@ -87,8 +97,8 @@ def main():
             # print(append_row)
             df.loc[len(df.index)] = append_row.loc[0]
             
-    # print(df.players)
-    # print(df.songs)
+    print(df.players)
+    print(df.songs)
     # print(df)
 
 if __name__ == "__main__":
