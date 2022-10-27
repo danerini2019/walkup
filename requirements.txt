@@ -5,3 +5,4 @@ matplotlib
 seaborn
 beautifulsoup4
 pybaseball
+spotipy
