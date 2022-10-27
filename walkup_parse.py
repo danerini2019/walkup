@@ -11,13 +11,13 @@ def main():
     pd.set_option('display.max_columns', None)
     # pd.set_option('display.max_colwidth', None)
     
-    team_lst = ["Angels", "Astros", "Athletics", "BlueJays", "Braves", 
-    "Cardinals", "Cubs", "Dbacks", "Dodgers", "Giants", "Guardians",
-    "Mariners", "Mets", "Nationals", "Orioles", "Padres",
-    "Phillies", "Rangers", "Rays", "Reds", "Rockies",
-    "Tigers", "Twins", "Yankees"]
+    # team_lst = ["Angels", "Astros", "Athletics", "BlueJays", "Braves", 
+    # "Cardinals", "Cubs", "Dbacks", "Dodgers", "Giants", "Guardians",
+    # "Mariners", "Mets", "Nationals", "Orioles", "Padres",
+    # "Phillies", "Rangers", "Rays", "Reds", "Rockies",
+    # "Tigers", "Twins", "Yankees"]
 
-    # team_lst = ['nationals']
+    team_lst = ['nationals']
 
     # teams_need_work = ['mets',']
 
@@ -40,6 +40,7 @@ def main():
     player_lst = []
     song_lst = []
     team_name_lst = []
+    spotify_link_list = []
     for team_name in team_lst: 
         team_name = team_name.lower()
         print(team_name)
@@ -50,6 +51,7 @@ def main():
         player_names = stuff.find_all(class_='u-text-h4 u-text-flow')
         player_songs = stuff.find_all(class_='p-wysiwyg styles-sc-1ewxgrh-0 styles-sc-9861x0-0 bjPBFY gLBcvo')
         songs_p_1 = player_songs[0].find_all('p')
+        # spotify_link_list = stuff.find_all()
         try:
             if 'by' not in player_songs[0].find('p').get_text():
                 player_songs = player_songs[1:]
@@ -57,8 +59,11 @@ def main():
             pass
 
         for i in range(len(player_songs)):
+            print(f'\n i={i}')
             songs_u_app = player_songs[i].find_all('span', {'class':'u-app-show'})
             songs_p_1 = player_songs[i].find_all('p')
+            spotify = player_songs[i].find_all('a', href=True)
+            # print(spotify)
             # print(songs_p_1)
             # if stuff.find_all(class_='u-app-show'):
             if songs_u_app:
@@ -72,6 +77,15 @@ def main():
                         player_lst.append(player_names[i].get_text().strip())
                         song_lst.append(songs[j].get_text().strip())
                         team_name_lst.append(team_name)
+                        print(songs[j].get_text().strip())
+                        if spotify[j].get('href'):
+                            print(f'if j={j}')
+                            print(spotify[j].get('href'))
+                            spotify_link_list.append(spotify[j].get('href'))
+                        else:
+                            print(f'else j={j}')
+                            spotify_link_list.append('no link')
+                        
                     except:
                         print('index out of range')
                         pass
@@ -83,6 +97,16 @@ def main():
                         player_lst.append(player_names[i].get_text().strip())
                         song_lst.append(songs[j].get_text().strip())
                         team_name_lst.append(team_name)
+                        print(songs[j].get_text().strip())
+                        if spotify[j].get('href'):
+                            print(f'if j={j}')
+                            print(spotify[j].get('href'))
+                            spotify_link_list.append(spotify[j].get('href'))
+                        else:
+                            print(f'else j={j}')
+                            spotify_link_list.append('')
+                        # print(f'i={i}')
+                        # print(spotify[j].get('href'))
                     except:
                         pass
 
@@ -94,6 +118,7 @@ def main():
     # Bringing values into dataframe and adding rows for players with multiple songs
     # print(player_lst)
     # print(song_lst)
+    print(spotify_link_list)
     player_lst_clean = []
     for i in range(len(player_lst)):
         player_lst_clean.append(player_lst[i].strip())
@@ -113,7 +138,7 @@ def main():
     # print(len(dict['songs']))
     # print(dict)
 
-    df = pd.DataFrame(columns = ['year', 'team', 'players', 'songs'])
+    df = pd.DataFrame(columns = ['year', 'team', 'players', 'songs', 'spotify_link'])
 
     for i in range(len(dict['songs'])):
         # print(f'i={i}')
@@ -124,14 +149,14 @@ def main():
 
             for j in range(len(plr_song_lst)):
                 # print(f'j={j}')
-                append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [plr_song_lst[j]]}
+                append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [plr_song_lst[j]], 'spotify_link': spotify_link_list[i]}
                 append_row = pd.DataFrame(append_row_dict)
                 # print(append_row)
                 df.loc[len(df.index)] = append_row.loc[0]
             
         else:
             # print(f'else i={i}')
-            append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [dict['songs'][i]]}
+            append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [dict['songs'][i]], 'spotify_link': spotify_link_list[i]}
             # print(append_row_dict)
             append_row = pd.DataFrame(append_row_dict)
             # print(append_row)
@@ -153,7 +178,7 @@ def main():
     df['artist'] = df['songs'].str.split(n=2, pat='by', expand=True)[1].str.strip()
     df['songs'] = df['songs'].str.split(n=2, pat='by', expand=True)[0].str.strip()
 
-    print(df)
+    # print(df)
 
 if __name__ == "__main__":
     main()
