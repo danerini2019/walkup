@@ -2,12 +2,14 @@ from multiprocessing.sharedctypes import SynchronizedString
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import numpy as np
 
 def main():
 
     # pd.set_option('display.max_colwidth', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
+    # pd.set_option('display.max_colwidth', None)
     
     team_lst = ["Angels", "Astros", "Athletics", "BlueJays", "Braves", 
     "Cardinals", "Cubs", "Dbacks", "Dodgers", "Giants", "Guardians",
@@ -15,7 +17,7 @@ def main():
     "Phillies", "Rangers", "Rays", "Reds", "Rockies",
     "Tigers", "Twins", "Yankees"]
 
-    # team_lst = ['rays']
+    # team_lst = ['nationals']
 
     # teams_need_work = ['mets',']
 
@@ -30,9 +32,14 @@ def main():
     #   multiple songs separated by returns
     # 4. Yankees - song not available - example in yanks, accessed by long 
     # in this case but could also appear in other forms
+    # 5. Braves - longer class followed by u-app-show/hide
+    #   players with multiple songs - songs in same u-app class
+    # 6. Bluejays - some second songs are stored in a u-app-hide class
+        # can't pull from all u-app-hide and show classes? ignore for now
 
     player_lst = []
     song_lst = []
+    team_name_lst = []
     for team_name in team_lst: 
         team_name = team_name.lower()
         print(team_name)
@@ -52,28 +59,32 @@ def main():
         for i in range(len(player_songs)):
             songs_u_app = player_songs[i].find_all('span', {'class':'u-app-show'})
             songs_p_1 = player_songs[i].find_all('p')
-            if stuff.find_all(class_='u-app-show'):
+            # print(songs_p_1)
+            # if stuff.find_all(class_='u-app-show'):
+            if songs_u_app:
                 songs = songs_u_app
+                # print(songs)
+                # print('\n' in songs[0].get_text())
                 for j in range(len(songs)):
                     try:
+                        # print(songs[j].get_text().strip())
+                        # print('\n')
                         player_lst.append(player_names[i].get_text().strip())
                         song_lst.append(songs[j].get_text().strip())
+                        team_name_lst.append(team_name)
                     except:
                         print('index out of range')
                         pass
             elif songs_p_1:
                 songs = songs_p_1
+                # print(songs)
                 for j in range(len(songs)):
                     try:
                         player_lst.append(player_names[i].get_text().strip())
                         song_lst.append(songs[j].get_text().strip())
+                        team_name_lst.append(team_name)
                     except:
-                        print('non-song entry catured')
                         pass
-            # else:
-            #     print('else called')
-            #     player_lst.append(player_names[i].get_text().strip())
-            #     song_lst.append(player_songs[i].get_text().strip())
 
         # lists of songs and players
         # player_lst.append([player_names[i].get_text() for i in range(len(player_names))])
@@ -102,31 +113,46 @@ def main():
     # print(len(dict['songs']))
     # print(dict)
 
-    df = pd.DataFrame(columns = ['players', 'songs'])
+    df = pd.DataFrame(columns = ['year', 'team', 'players', 'songs'])
 
     for i in range(len(dict['songs'])):
         # print(f'i={i}')
-        if '\n' in dict['songs'][i]:
-            plr_song_lst = dict['songs'][i].split('\n\n')
+        if '\n' in dict['songs'][i] and dict['songs'][i].count('by') > 1:
+            # print(dict['songs'][i])
+            plr_song_lst = dict['songs'][i].split('\n')
             # print(plr_song_lst)
 
             for j in range(len(plr_song_lst)):
                 # print(f'j={j}')
-                append_row_dict = {'players': [dict['players'][i]], 'songs': [plr_song_lst[j]]}
+                append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [plr_song_lst[j]]}
                 append_row = pd.DataFrame(append_row_dict)
                 # print(append_row)
                 df.loc[len(df.index)] = append_row.loc[0]
             
         else:
             # print(f'else i={i}')
-            append_row_dict = {'players': [dict['players'][i]], 'songs': [dict['songs'][i]]}
+            append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [dict['songs'][i]]}
             # print(append_row_dict)
             append_row = pd.DataFrame(append_row_dict)
             # print(append_row)
             df.loc[len(df.index)] = append_row.loc[0]
-            
-    # print(df.players)
-    # print(df.songs)
+    
+    # dropping empty song rows that occurred as a result of splitting above
+    df['songs'].replace('', np.nan, inplace=True)
+    df.dropna(subset=['songs'], inplace=True)
+
+    # getting rid of number in front of nationals players names
+    nats_players_clean = []
+    for player in df['players'][df.team == 'nationals']:
+        name_start_index = player.find(next(filter(str.isalpha, player)))
+        nats_players_clean.append(player[name_start_index:])
+    
+    df['players'][df.team == 'nationals'] = nats_players_clean
+
+    # Split songs and artists
+    df['artist'] = df['songs'].str.split(n=2, pat='by', expand=True)[1].str.strip()
+    df['songs'] = df['songs'].str.split(n=2, pat='by', expand=True)[0].str.strip()
+
     print(df)
 
 if __name__ == "__main__":
