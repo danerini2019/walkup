@@ -182,6 +182,7 @@ def main():
     df['songs'] = df['songs'].str.split(n=2, pat='by', expand=True)[0].str.strip()
 
     # print(df)
+    df.to_pickle('walkup_song_df.pkl')
     return df
 
 if __name__ == "__main__":
