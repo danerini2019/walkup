@@ -62,63 +62,27 @@ def main():
             # print(f'\n i={i}')
             songs_u_app = player_songs[i].find_all('span', {'class':'u-app-show'})
             songs_p_1 = player_songs[i].find_all('p')
-            # spotify = player_songs[i].find_all('a', href=True)
-            # print(spotify)
-            # print(songs_p_1)
-            # if stuff.find_all(class_='u-app-show'):
             if songs_u_app:
                 songs = songs_u_app
-                # print(songs)
-                # print('\n' in songs[0].get_text())
                 for j in range(len(songs)):
                     try:
-                        # print(songs[j].get_text().strip())
-                        # print('\n')
                         player_lst.append(player_names[i].get_text().strip())
                         song_lst.append(songs[j].get_text().strip())
                         team_name_lst.append(team_name)
-                        # print(songs[j].get_text().strip())
-                        # if spotify[j].get('href'):
-                        #     print(f'if j={j}')
-                        #     print(spotify[j].get('href'))
-                        #     spotify_link_list.append(spotify[j].get('href'))
-                        # else:
-                        #     print(f'else j={j}')
-                        #     spotify_link_list.append('no link')
                         
                     except:
                         print('index out of range')
                         pass
             elif songs_p_1:
                 songs = songs_p_1
-                # print(songs)
                 for j in range(len(songs)):
                     try:
                         player_lst.append(player_names[i].get_text().strip())
                         song_lst.append(songs[j].get_text().strip())
                         team_name_lst.append(team_name)
-                        # print(songs[j].get_text().strip())
-                        # if spotify[j].get('href'):
-                        #     print(f'if j={j}')
-                        #     print(spotify[j].get('href'))
-                        #     spotify_link_list.append(spotify[j].get('href'))
-                        # else:
-                        #     print(f'else j={j}')
-                            # spotify_link_list.append('')
-                        # print(f'i={i}')
-                        # print(spotify[j].get('href'))
                     except:
                         pass
 
-        # lists of songs and players
-        # player_lst.append([player_names[i].get_text() for i in range(len(player_names))])
-        # song_lst.append([player_songs[i].get_text() for i in range(len(player_songs))])
-        # # print([player_songs[i].get_text() for i in range(len(player_songs))])
-
-    # Bringing values into dataframe and adding rows for players with multiple songs
-    # print(player_lst)
-    # print(song_lst)
-    # print(spotify_link_list)
     player_lst_clean = []
     for i in range(len(player_lst)):
         player_lst_clean.append(player_lst[i].strip())
@@ -130,15 +94,9 @@ def main():
     song_lst_clean = []
     for i in range(len(song_lst)):
         song_lst_clean.append(song_lst[i].strip())
-        # print(song_lst_clean)
-        # print(song_lst[i][j].strip())
 
     dict = {'players': player_lst_clean,'songs': song_lst_clean}
-    # print(len(dict['players']))
-    # print(len(dict['songs']))
-    # print(dict)
 
-    # df = pd.DataFrame(columns = ['year', 'team', 'players', 'songs', 'spotify_link'])
     df = pd.DataFrame(columns = ['year', 'team', 'players', 'songs'])
 
     for i in range(len(dict['songs'])):
@@ -149,20 +107,13 @@ def main():
             # print(plr_song_lst)
 
             for j in range(len(plr_song_lst)):
-                # print(f'j={j}')
-                # append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [plr_song_lst[j]], 'spotify_link': spotify_link_list[i]}
                 append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [plr_song_lst[j]]}
                 append_row = pd.DataFrame(append_row_dict)
-                # print(append_row)
                 df.loc[len(df.index)] = append_row.loc[0]
             
         else:
-            # print(f'else i={i}')
-            # append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [dict['songs'][i]], 'spotify_link': spotify_link_list[i]}
             append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [dict['songs'][i]]}
-            # print(append_row_dict)
             append_row = pd.DataFrame(append_row_dict)
-            # print(append_row)
             df.loc[len(df.index)] = append_row.loc[0]
     
     # dropping empty song rows that occurred as a result of splitting above
