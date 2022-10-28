@@ -15,6 +15,8 @@ This project aims to parse, clean, model, and analyze MLB walkup songs from the 
  - connection to baseball library to get stats of different players by genre
     - slumping players changing their song more often
     - what genre/artist had the best/worst stats
+ - connect to instagram api to get follower info for players
+   - potential project by itself: player stats vs. ig followers (followers/HR, ops+/follower, etc.)
 
 
 
