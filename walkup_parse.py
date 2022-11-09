@@ -3,21 +3,22 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
+from pprint import pprint
 
 def main():
 
     # pd.set_option('display.max_colwidth', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
-    # pd.set_option('display.max_colwidth', None)
+    pd.set_option('display.max_colwidth', None)
     
-    team_lst = ["Angels", "Astros", "Athletics", "BlueJays", "Braves", 
-    "Cardinals", "Cubs", "Dbacks", "Dodgers", "Giants", "Guardians",
-    "Mariners", "Mets", "Nationals", "Orioles", "Padres",
-    "Phillies", "Rangers", "Rays", "Reds", "Rockies",
-    "Tigers", "Twins", "Yankees"]
+    # team_lst = ["Angels", "Astros", "Athletics", "BlueJays", "Braves", 
+    # "Cardinals", "Cubs", "Dbacks", "Dodgers", "Giants", "Guardians",
+    # "Mariners", "Mets", "Nationals", "Orioles", "Padres",
+    # "Phillies", "Rangers", "Rays", "Reds", "Rockies",
+    # "Tigers", "Twins", "Yankees"]
 
-    # team_lst = ['nationals']
+    team_lst = ['yankees']
 
     # teams_need_work = ['mets',']
 
@@ -40,18 +41,17 @@ def main():
     player_lst = []
     song_lst = []
     team_name_lst = []
-    # spotify_link_list = []
+    spotify_link_list = []
     for team_name in team_lst: 
         team_name = team_name.lower()
-        # print(team_name)
+        print(team_name)
         page = requests.get(f'https://www.mlb.com/{team_name}/ballpark/music')
         soup = BeautifulSoup(page.content, 'html.parser')
         stuff = list(soup.children)[1]
         stuff = list(stuff.children)[1]
         player_names = stuff.find_all(class_='u-text-h4 u-text-flow')
         player_songs = stuff.find_all(class_='p-wysiwyg styles-sc-1ewxgrh-0 styles-sc-9861x0-0 bjPBFY gLBcvo')
-        songs_p_1 = player_songs[0].find_all('p')
-        # spotify_link_list = stuff.find_all()
+        hrefs = list(player_songs)
         try:
             if 'by' not in player_songs[0].find('p').get_text():
                 player_songs = player_songs[1:]
@@ -61,28 +61,48 @@ def main():
         for i in range(len(player_songs)):
             # print(f'\n i={i}')
             songs_u_app = player_songs[i].find_all('span', {'class':'u-app-show'})
+            # print(songs_u_app)
             songs_p_1 = player_songs[i].find_all('p')
+            # print(songs_p_1)
+            spotify_url = hrefs[i].find('a')
+            if spotify_url == None:
+                spotify_url_href = ''
+            else:
+                spotify_url_href = hrefs[i].find_all('a', href=True)
+            print('1')
+            print(spotify_url_href)
+            print('2')
+            
             if songs_u_app:
                 songs = songs_u_app
                 for j in range(len(songs)):
                     try:
+                        print(songs[j].get_text().strip())
+                        print(spotify_url_href[j].get('href'))
                         player_lst.append(player_names[i].get_text().strip())
                         song_lst.append(songs[j].get_text().strip())
                         team_name_lst.append(team_name)
+                        spotify_link_list.append(spotify_url_href[j].get('href'))
                         
                     except:
-                        print('index out of range')
+                        spotify_link_list.append('')
                         pass
+                    
             elif songs_p_1:
                 songs = songs_p_1
                 for j in range(len(songs)):
                     try:
+                        print(songs[j].get_text().strip())
+                        print(spotify_url_href[j].get('href'))
                         player_lst.append(player_names[i].get_text().strip())
                         song_lst.append(songs[j].get_text().strip())
                         team_name_lst.append(team_name)
+                        spotify_link_list.append(spotify_url_href[j].get('href'))
                     except:
+                        spotify_link_list.append('')
                         pass
 
+    # print(spotify_link_list)
     player_lst_clean = []
     for i in range(len(player_lst)):
         player_lst_clean.append(player_lst[i].strip())
@@ -97,7 +117,7 @@ def main():
 
     dict = {'players': player_lst_clean,'songs': song_lst_clean}
 
-    df = pd.DataFrame(columns = ['year', 'team', 'players', 'songs'])
+    df = pd.DataFrame(columns = ['year', 'team', 'players', 'songs', 'spotify_url'])
 
     for i in range(len(dict['songs'])):
         # print(f'i={i}')
@@ -107,12 +127,12 @@ def main():
             # print(plr_song_lst)
 
             for j in range(len(plr_song_lst)):
-                append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [plr_song_lst[j]]}
+                append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [plr_song_lst[j]], 'spotify_url': [spotify_link_list[i]]}
                 append_row = pd.DataFrame(append_row_dict)
                 df.loc[len(df.index)] = append_row.loc[0]
             
         else:
-            append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [dict['songs'][i]]}
+            append_row_dict = {'year': 2022, 'team': team_name_lst[i], 'players': [dict['players'][i]], 'songs': [dict['songs'][i]], 'spotify_url': [spotify_link_list[i]]}
             append_row = pd.DataFrame(append_row_dict)
             df.loc[len(df.index)] = append_row.loc[0]
     
@@ -132,7 +152,7 @@ def main():
     df['artist'] = df['songs'].str.split(n=2, pat='by', expand=True)[1].str.strip()
     df['songs'] = df['songs'].str.split(n=2, pat='by', expand=True)[0].str.strip()
 
-    # print(df)
+    print(df)
     df.to_pickle('walkup_song_df.pkl')
     return df
 

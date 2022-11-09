@@ -17,8 +17,10 @@ sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
 
 # dataframe of walkup songs
 df = pd.read_pickle('walkup_song_df.pkl')
+print('df')
+print(df.shape[0])
 
-print(df[['team', 'players', 'artist','songs']].iloc[310:320])
+# print(df[['team', 'players', 'artist','songs']].iloc[310:320])
 
 no_results_list = []
 track_id = []
@@ -31,45 +33,71 @@ album_release_date = []
 artist_followers = []
 artist_genres = []
 artist_popularity = []
+api_song_name = []
+api_artist_name = []
+results = {}
 
-
-# df_snippet = df.iloc[:5]
-# print(df_snippet)
-for index, row in df.iterrows():
+df_snippet = df.iloc[:20]
+for index, row in df_snippet.iterrows():
     artist = row['artist']
-    # print(artist)
+    print(artist)
     song = row['songs']
+    print(song)
+    results = sp.search(q="artist:" + artist + " track:" + song, type="track")
+    # print(results)
     # print(song)
-    try:
-        results = sp.search(q="artist:" + artist + " track:" + song, type="track")
+    # print(f'track_id: {len(track_id)}')
+    # print(f'popularity: {len(popularity)}')
+    # print(f'artist_genres: {len(artist_genres)}')
+    # pprint(f'song_name: {api_song_name}\n')
+    # pprint(f'artist: {api_artist_name}\n')
+    # print(f'popularity: {popularity}\n')
+    # print(f'artist_genres: {artist_genres}\n')
+    # print(f'album_release_date: {album_release_date}\n')
+    pprint(results['tracks']['items'])
+   
+    if results['tracks']['items'] != []:
+        print('song matches \n')
         track_id.append(results['tracks']['items'][0]['id'])
+        api_song_name.append(results['tracks']['items'][0]['name'])
+        api_artist_name.append(results['tracks']['items'][0]['artists'][0]['name'])
         popularity.append(results['tracks']['items'][0]['popularity'])
         uri.append(results['tracks']['items'][0]['uri'])
         explicit.append(results['tracks']['items'][0]['explicit'])
         duration_ms.append(results['tracks']['items'][0]['duration_ms'])
         spotify_url.append(results['tracks']['items'][0]['external_urls']['spotify'])
         album_release_date.append(results['tracks']['items'][0]['album']['release_date'])
-        artist_followers.append(results['tracks']['items'][0]['artists']['followers']['total'])
-        artist_genres.append(results['tracks']['items'][0]['artists']['genres'])
-        artist_popularity.append(results['tracks']['items'][0]['artists']['popularity'])
-    except:
+    else:
+        print('song does not match\n')
         no_results_list.append([artist, song])
-        track_id.append(None)
-        popularity.append(None)
-        uri.append(None)
-        explicit.append(None)
-        duration_ms.append(None)
-        spotify_url.append(None)
-        album_release_date.append(None)
-        artist_followers.append(None)
-        artist_genres.append(None)
-        artist_popularity.append(None)
+        track_id.append('')
+        popularity.append('')
+        uri.append('')
+        explicit.append('')
+        duration_ms.append('')
+        spotify_url.append('')
+        album_release_date.append('')
+    
 
-print(len(track_id))
-print(len(no_results_list))
+print('api adds')
+pprint(no_results_list)
+pprint(track_id)
+pprint(api_song_name)
+pprint(api_artist_name)
+pprint(popularity)
+pprint(uri)
+pprint(explicit)
+pprint(duration_ms)
+pprint(duration_ms)
+pprint(spotify_url)
+pprint(album_release_date)
 
-df.insert(loc=len(df.columns), column='track_id', value=track_id)
-print(df.head())
+
+# print(track_id[:5])
+# print(artist_genres[:5])
+
+# df.insert(loc=len(df.columns), column='track_id', value=track_id)
+# print(df.head())
 # artist = 'Ruben Blades'
 # song = 'Patira'
 # results = sp.search(q="artist:" + artist + " track:" + song, type="track")
