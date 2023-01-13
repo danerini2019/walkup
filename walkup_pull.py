@@ -5,13 +5,13 @@ from pprint import pprint
 
 def main():
 
-    team_lst = ["Angels", "Astros", "Athletics", "BlueJays", "Braves", 
-    "Cardinals", "Cubs", "Dbacks", "Dodgers", "Giants", "Guardians",
-    "Mariners", "Mets", "Nationals", "Orioles", "Padres",
-    "Phillies", "Rangers", "Rays", "Reds", "Rockies",
-    "Tigers", "Twins", "Yankees"]
+    # team_lst = ["Angels", "Astros", "Athletics", "BlueJays", "Braves", 
+    # "Cardinals", "Cubs", "Dbacks", "Dodgers", "Giants", "Guardians",
+    # "Mariners", "Mets", "Nationals", "Orioles", "Padres",
+    # "Phillies", "Rangers", "Rays", "Reds", "Rockies",
+    # "Tigers", "Twins", "Yankees"]
 
-    # team_lst = ['yankees']
+    team_lst = ['yankees']
 
     # teams_need_work = ['mets',']
 
